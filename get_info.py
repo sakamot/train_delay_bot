@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from slackbot.bot import Bot
 import requests
 import json
+import os
 
 def get_delay_info():
     url = "https://transit.yahoo.co.jp/traininfo/area/4/"
@@ -22,7 +23,7 @@ def get_delay_info():
     notify_slack(post_text or '遅延してる路線はありません。')
 
 def notify_slack(text):
-    url = "your url"
+    url = os.environ["SLACK_URL"]
     requests.post(url, data = json.dumps({
         'text': text, # 投稿するテキスト
     }))
