@@ -6,7 +6,7 @@ import requests
 import json
 import os
 
-def get_delay_info():
+def get_delay_info(event, context):
     url = "https://transit.yahoo.co.jp/traininfo/area/4/"
     html = urllib.request.urlopen(url)
     soup = BeautifulSoup(html, "html.parser")
@@ -15,12 +15,12 @@ def get_delay_info():
 
     for tr in div_trouble.find_all('tr')[1:-1]:
         a_tag = tr.find('a')
-        link = "[" + a_tag.string + "](" + a_tag.attrs['href'] + ")"
         status = tr.find('span', attrs={"class": "colTrouble"}).string
         text = tr.find_all('td')[2].string
-        post_text += "*!" + status + "!* " + link + "\n" + text
+        post_text += "*!" + status + "：" + a_tag.string + "!* " + a_tag.attrs['href'] + "\n" + text + "\n\n"
 
     notify_slack(post_text or '遅延してる路線はありません。')
+    return 'Success!'
 
 def notify_slack(text):
     url = os.environ["SLACK_URL"]
