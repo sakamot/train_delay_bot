@@ -11,19 +11,31 @@ def get_delay_info(event, context):
     html = urllib.request.urlopen(url)
     soup = BeautifulSoup(html, "html.parser")
     div_trouble = soup.find("div", attrs={"class": "elmTblLstLine trouble"})
-    post_text = ""
+    fields = []
 
-    for tr in div_trouble.find_all('tr')[1:-1]:
+    for tr in div_trouble.find_all('tr')[1:]:
         a_tag = tr.find('a')
         status = tr.find('span', attrs={"class": "colTrouble"}).string
         text = tr.find_all('td')[2].string
-        post_text += "*!" + status + "：" + a_tag.string + "!* " + a_tag.attrs['href'] + "\n" + text + "\n\n"
+        fields.append({"title": status + ": " + a_tag.string, "value": "<" + a_tag.attrs['href'] + "|" + text + ">"})
 
-    notify_slack(post_text or '遅延してる路線はありません。')
+    notify_slack(fields)
     return 'Success!'
 
-def notify_slack(text):
+def notify_slack(fields):
     url = os.environ["SLACK_URL"]
+    attachments = []
+    if not fields:
+        attachments.append(
+            {
+                "colof": "#36a64f",
+                "fields": [{"value": "遅延している路線はありません:smile:"}]
+            }
+        )
+    for f in fields:
+        attachments.append({"color": "#D00000", "fields": [f]})
+
     requests.post(url, data = json.dumps({
-        'text': text, # 投稿するテキスト
+        'text': "遅延情報",
+        "attachments": attachments
     }))
