@@ -27,17 +27,11 @@ def get_delay_info(event, context):
 def notify_slack(fields):
     url = os.environ["SLACK_URL"]
     attachments = []
-    if not fields:
-        attachments.append(
-            {
-                "colof": "#36a64f",
-                "fields": [{"value": "遅延している路線はありません:smile:"}]
-            }
-        )
-    for f in fields:
-        attachments.append({"color": "#D00000", "fields": [f]})
+    if fields:
+        for f in fields:
+            attachments.append({"color": "#D00000", "fields": [f]})
 
-    requests.post(url, data = json.dumps({
-        'text': "遅延情報",
-        "attachments": attachments
-    }))
+        requests.post(url, data = json.dumps({
+            'text': "遅延情報",
+            "attachments": attachments
+        }))
